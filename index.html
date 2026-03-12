@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fortune Cookie</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #1a0a00;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: Georgia, serif;
+      overflow: hidden;
+    }
+
+    h1 {
+      color: #c8902a;
+      font-size: 1.1rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      opacity: 0.7;
+    }
+
+    #cookie {
+      font-size: 10rem;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease;
+      filter: drop-shadow(0 0 30px rgba(200, 144, 42, 0.4));
+    }
+
+    #cookie:hover {
+      transform: scale(1.08);
+      filter: drop-shadow(0 0 50px rgba(200, 144, 42, 0.7));
+    }
+
+    #cookie:active {
+      transform: scale(0.95);
+    }
+
+    #cookie.cracked {
+      animation: crack 0.4s ease forwards;
+    }
+
+    @keyframes crack {
+      0%   { transform: scale(1); }
+      30%  { transform: scale(1.15) rotate(-5deg); }
+      60%  { transform: scale(0.9) rotate(3deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    #hint {
+      color: #c8902a;
+      opacity: 0.5;
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+    }
+
+    /* Fortune overlay */
+    #overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    #overlay.show {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    #fortune-card {
+      background: #fdf6e3;
+      border: 2px solid #c8902a;
+      border-radius: 4px;
+      padding: 3rem 3.5rem;
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+      position: relative;
+      animation: slideUp 0.3s ease;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    #fortune-card::before {
+      content: "✦  Your Fortune  ✦";
+      display: block;
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      color: #c8902a;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    #fortune-text {
+      font-size: 1.25rem;
+      color: #2c1a00;
+      line-height: 1.7;
+      font-style: italic;
+    }
+
+    #lucky-numbers {
+      margin-top: 1.5rem;
+      font-size: 0.75rem;
+      color: #c8902a;
+      letter-spacing: 0.1em;
+    }
+
+    #close-btn {
+      margin-top: 2rem;
+      background: none;
+      border: 1px solid #c8902a;
+      color: #c8902a;
+      padding: 0.5rem 2rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    #close-btn:hover {
+      background: #c8902a;
+      color: #1a0a00;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Fortune Cookie</h1>
+  <div id="cookie">🥠</div>
+  <p id="hint">click to reveal your fortune</p>
+
+  <div id="overlay">
+    <div id="fortune-card">
+      <p id="fortune-text"></p>
+      <p id="lucky-numbers"></p>
+      <button id="close-btn">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const fortunes = [
+      "A beautiful, smart, and loving person will be coming into your life.",
+      "Adventure can be real happiness.",
+      "All the answers you need are right there in front of you.",
+      "A dream you have will come true.",
+      "Be not afraid of growing slowly; be afraid only of standing still.",
+      "Curiosity is the wick in the candle of learning.",
+      "Do not be afraid to take that big step.",
+      "Every day is an opportunity to learn something new.",
+      "Fortune favors the prepared mind.",
+      "Great things are not done by impulse, but by a series of small things brought together.",
+      "Hard work pays off in the future. Laziness pays off now.",
+      "In the middle of every difficulty lies opportunity.",
+      "It is better to have a hen tomorrow than an egg today.",
+      "Keep your face to the sunshine and you cannot see the shadows.",
+      "Laughter is the shortest distance between two people.",
+      "Life is a journey, not a destination — enjoy the ride.",
+      "Now is the time to try something new.",
+      "One who works with their hands is a laborer. One who works with their mind is a craftsman.",
+      "Patience is a virtue worth possessing.",
+      "Question your assumptions. The answer might surprise you.",
+      "Small steps every day lead to great distances.",
+      "The best time to plant a tree was twenty years ago. The second best time is now.",
+      "The harder you work, the luckier you get.",
+      "There is no greater wealth than wisdom.",
+      "To know the road ahead, ask those coming back.",
+      "True generosity means giving what costs you something.",
+      "What you put into the world will find its way back to you.",
+      "You are capable of more than you know.",
+      "Your ability to juggle many tasks will take you far.",
+      "Your mind is your greatest tool — keep it sharp.",
+      "A smooth sea never made a skilled sailor.",
+      "Behind every great achiever is a great amount of patience.",
+      "Creativity is intelligence having fun.",
+      "Doors will open wherever you are willing to knock.",
+      "Every expert was once a beginner.",
+    ];
+
+    function randomLucky() {
+      const nums = [];
+      while (nums.length < 6) {
+        const n = Math.floor(Math.random() * 49) + 1;
+        if (!nums.includes(n)) nums.push(n);
+      }
+      return "Lucky numbers: " + nums.sort((a,b)=>a-b).join("  ·  ");
+    }
+
+    const cookie  = document.getElementById("cookie");
+    const overlay = document.getElementById("overlay");
+    const text    = document.getElementById("fortune-text");
+    const lucky   = document.getElementById("lucky-numbers");
+    const closeBtn = document.getElementById("close-btn");
+
+    cookie.addEventListener("click", () => {
+      cookie.classList.add("cracked");
+      setTimeout(() => {
+        const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+        text.textContent = fortune;
+        lucky.textContent = randomLucky();
+        overlay.classList.add("show");
+      }, 300);
+    });
+
+    function closeFortune() {
+      overlay.classList.remove("show");
+      cookie.classList.remove("cracked");
+    }
+
+    closeBtn.addEventListener("click", closeFortune);
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeFortune();
+    });
+  </script>
+</body>
+</html>
